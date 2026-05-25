@@ -6,6 +6,7 @@ import { cors } from 'hono/cors'
 import { runMigrations } from './db/migrate.js'
 import { search } from './routes/search.js'
 import { musicLinks } from './routes/musicLinks.js'
+import { events } from './routes/events.js'
 
 mkdirSync('./data', { recursive: true })
 await runMigrations()
@@ -16,6 +17,7 @@ app.get('/health', (c) => c.json({ ok: true }))
 app.route('/api/search', search)
 app.route('/api/tracks', search)
 app.route('/api/music-links', musicLinks)
+app.route('/api/music-links', events)
 
 const port = Number(process.env.PORT) || 3001
 serve({ fetch: app.fetch, port }, () => {

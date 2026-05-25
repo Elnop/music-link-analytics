@@ -76,6 +76,56 @@ musicLinks.post('/', async (c) => {
   return c.json(record, 201)
 })
 
+// GET /api/music-links/:id/report — analytics report (MUST be before /:id)
+musicLinks.get('/:id/report', async (c) => {
+  const { id } = c.req.param()
+  const link = await kysely.selectFrom('music_links').selectAll().where('id', '=', id).executeTakeFirst()
+  if (!link) return c.json({ error: 'Not found' }, 404)
+
+  const allEvents = await kysely
+    .selectFrom('music_link_events')
+    .selectAll()
+    .where('music_link_id', '=', id)
+    .orderBy('created_at', 'asc')
+    .execute()
+
+  const views = allEvents.filter((e) => e.event_type === 'page_view')
+  const clicks = allEvents.filter((e) => e.event_type === 'platform_click')
+
+  // clicks per platform
+  const clicksByPlatform: Record<string, number> = {}
+  for (const e of clicks) {
+    if (e.platform) clicksByPlatform[e.platform] = (clicksByPlatform[e.platform] ?? 0) + 1
+  }
+
+  // views per day (YYYY-MM-DD)
+  const viewsByDay: Record<string, number> = {}
+  for (const e of views) {
+    const day = e.created_at.slice(0, 10)
+    viewsByDay[day] = (viewsByDay[day] ?? 0) + 1
+  }
+
+  // clicks per day
+  const clicksByDay: Record<string, number> = {}
+  for (const e of clicks) {
+    const day = e.created_at.slice(0, 10)
+    clicksByDay[day] = (clicksByDay[day] ?? 0) + 1
+  }
+
+  const totalViews = views.length
+  const totalClicks = clicks.length
+  const clickRate = totalViews > 0 ? (totalClicks / totalViews) * 100 : 0
+
+  return c.json({
+    totalViews,
+    totalClicks,
+    clickRate: Math.round(clickRate * 100) / 100,
+    clicksByPlatform,
+    viewsByDay,
+    clicksByDay,
+  })
+})
+
 // GET /api/music-links/:id
 musicLinks.get('/:id', async (c) => {
   const { id } = c.req.param()
