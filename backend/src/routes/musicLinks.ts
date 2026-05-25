@@ -55,10 +55,12 @@ musicLinks.post('/', async (c) => {
     soundcloud_url: string | null
   }>()
 
+  if (!body.spotify_track_id) return c.json({ error: 'spotify_track_id is required' }, 400)
+
   const now = new Date().toISOString()
   const id = nanoid(10)
 
-  await kysely.insertInto('music_links').values({
+  const record = {
     id,
     spotify_track_id: body.spotify_track_id,
     spotify_url: body.spotify_url ?? null,
@@ -68,10 +70,10 @@ musicLinks.post('/', async (c) => {
     soundcloud_url: body.soundcloud_url ?? null,
     created_at: now,
     updated_at: now,
-  }).execute()
+  }
 
-  const created = await kysely.selectFrom('music_links').selectAll().where('id', '=', id).executeTakeFirstOrThrow()
-  return c.json(created, 201)
+  await kysely.insertInto('music_links').values(record).execute()
+  return c.json(record, 201)
 })
 
 // GET /api/music-links/:id
