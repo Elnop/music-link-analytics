@@ -1,5 +1,3 @@
-import type { Generated } from 'kysely'
-
 export interface MusicLinkTable {
   id: string
   spotify_track_id: string
