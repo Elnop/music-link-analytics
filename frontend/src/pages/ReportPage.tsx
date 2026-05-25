@@ -33,10 +33,6 @@ export function ReportPage() {
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([day, count]) => ({ day, views: count }))
 
-  const clicksData = Object.entries(report.clicksByDay)
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([day, count]) => ({ day, clicks: count }))
-
   const platformData = Object.entries(report.clicksByPlatform).map(([platform, count]) => ({
     platform,
     clicks: count,
