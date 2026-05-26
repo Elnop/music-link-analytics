@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { nanoid } from 'nanoid';
+import { sql } from 'kysely';
 import { kysely } from '../db/client.js';
 import { getTrack } from '../services/spotify.js';
 
@@ -146,48 +147,73 @@ musicLinks.get('/:id/report', async (c) => {
 		.executeTakeFirst();
 	if (!link) return c.json({ error: 'Not found' }, 404);
 
-	const allEvents = await kysely
+	const [{ totalViews }] = await kysely
 		.selectFrom('music_link_events')
-		.selectAll()
+		.select(kysely.fn.count<number>('id').as('totalViews'))
 		.where('music_link_id', '=', id)
-		.orderBy('created_at', 'asc')
+		.where('event_type', '=', 'page_view')
 		.execute();
 
-	const views = allEvents.filter((e) => e.event_type === 'page_view');
-	const clicks = allEvents.filter((e) => e.event_type === 'platform_click');
+	const [{ totalClicks }] = await kysely
+		.selectFrom('music_link_events')
+		.select(kysely.fn.count<number>('id').as('totalClicks'))
+		.where('music_link_id', '=', id)
+		.where('event_type', '=', 'platform_click')
+		.execute();
 
-	// clicks per platform
+	const clicksByPlatformRows = await kysely
+		.selectFrom('music_link_events')
+		.select(['platform', kysely.fn.count<number>('id').as('cnt')])
+		.where('music_link_id', '=', id)
+		.where('event_type', '=', 'platform_click')
+		.where('platform', 'is not', null)
+		.groupBy('platform')
+		.execute();
+
+	const viewsByDayRows = await kysely
+		.selectFrom('music_link_events')
+		.select([
+			sql<string>`substr(created_at, 1, 10)`.as('day'),
+			kysely.fn.count<number>('id').as('cnt'),
+		])
+		.where('music_link_id', '=', id)
+		.where('event_type', '=', 'page_view')
+		.groupBy(sql`substr(created_at, 1, 10)`)
+		.orderBy(sql`substr(created_at, 1, 10)`, 'asc')
+		.execute();
+
+	const clicksByDayRows = await kysely
+		.selectFrom('music_link_events')
+		.select([
+			sql<string>`substr(created_at, 1, 10)`.as('day'),
+			kysely.fn.count<number>('id').as('cnt'),
+		])
+		.where('music_link_id', '=', id)
+		.where('event_type', '=', 'platform_click')
+		.groupBy(sql`substr(created_at, 1, 10)`)
+		.orderBy(sql`substr(created_at, 1, 10)`, 'asc')
+		.execute();
+
+	const views = Number(totalViews);
+	const clicks = Number(totalClicks);
+	const clickRate = views > 0 ? Math.round((clicks / views) * 10000) / 100 : 0;
+
 	const clicksByPlatform: Record<string, number> = {};
-	for (const e of clicks) {
-		if (e.platform) clicksByPlatform[e.platform] = (clicksByPlatform[e.platform] ?? 0) + 1;
+	for (const row of clicksByPlatformRows) {
+		if (row.platform) clicksByPlatform[row.platform] = Number(row.cnt);
 	}
 
-	// views per day (YYYY-MM-DD)
 	const viewsByDay: Record<string, number> = {};
-	for (const e of views) {
-		const day = e.created_at.slice(0, 10);
-		viewsByDay[day] = (viewsByDay[day] ?? 0) + 1;
+	for (const row of viewsByDayRows) {
+		viewsByDay[row.day] = Number(row.cnt);
 	}
 
-	// clicks per day
 	const clicksByDay: Record<string, number> = {};
-	for (const e of clicks) {
-		const day = e.created_at.slice(0, 10);
-		clicksByDay[day] = (clicksByDay[day] ?? 0) + 1;
+	for (const row of clicksByDayRows) {
+		clicksByDay[row.day] = Number(row.cnt);
 	}
 
-	const totalViews = views.length;
-	const totalClicks = clicks.length;
-	const clickRate = totalViews > 0 ? (totalClicks / totalViews) * 100 : 0;
-
-	return c.json({
-		totalViews,
-		totalClicks,
-		clickRate: Math.round(clickRate * 100) / 100,
-		clicksByPlatform,
-		viewsByDay,
-		clicksByDay,
-	});
+	return c.json({ totalViews: views, totalClicks: clicks, clickRate, clicksByPlatform, viewsByDay, clicksByDay });
 });
 
 // GET /api/music-links/:id
