@@ -98,7 +98,13 @@ export function ReportPage() {
 	return (
 		<Box style={{ background: 'var(--glow-indigo)', minHeight: '100vh' }}>
 			<Container size="lg" py="xl">
-				<Button variant="subtle" color="gray" mb="md" leftSection={<IconArrowLeft size={16} />} onClick={() => navigate('/')}>
+				<Button
+					variant="subtle"
+					color="gray"
+					mb="md"
+					leftSection={<IconArrowLeft size={16} />}
+					onClick={() => navigate('/')}
+				>
 					Back
 				</Button>
 				<Title order={2} fw={500} c="white" mb="xl">
@@ -150,10 +156,24 @@ export function ReportPage() {
 										</linearGradient>
 									</defs>
 									<CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" />
-									<XAxis dataKey="day" tick={{ fill: '#828282', fontSize: 11 }} axisLine={false} tickLine={false} />
-									<YAxis allowDecimals={false} tick={{ fill: '#828282', fontSize: 11 }} axisLine={false} tickLine={false} />
+									<XAxis
+										dataKey="day"
+										tick={{ fill: '#828282', fontSize: 11 }}
+										axisLine={false}
+										tickLine={false}
+									/>
+									<YAxis
+										allowDecimals={false}
+										tick={{ fill: '#828282', fontSize: 11 }}
+										axisLine={false}
+										tickLine={false}
+									/>
 									<Tooltip
-										contentStyle={{ backgroundColor: '#1f1f1f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8 }}
+										contentStyle={{
+											backgroundColor: '#1f1f1f',
+											border: '1px solid rgba(255,255,255,0.1)',
+											borderRadius: 8,
+										}}
 										labelStyle={{ color: '#fff' }}
 										itemStyle={{ color: '#868afa' }}
 									/>
@@ -191,10 +211,24 @@ export function ReportPage() {
 										</linearGradient>
 									</defs>
 									<CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" />
-									<XAxis dataKey="platform" tick={{ fill: '#828282', fontSize: 11 }} axisLine={false} tickLine={false} />
-									<YAxis allowDecimals={false} tick={{ fill: '#828282', fontSize: 11 }} axisLine={false} tickLine={false} />
+									<XAxis
+										dataKey="platform"
+										tick={{ fill: '#828282', fontSize: 11 }}
+										axisLine={false}
+										tickLine={false}
+									/>
+									<YAxis
+										allowDecimals={false}
+										tick={{ fill: '#828282', fontSize: 11 }}
+										axisLine={false}
+										tickLine={false}
+									/>
 									<Tooltip
-										contentStyle={{ backgroundColor: '#1f1f1f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8 }}
+										contentStyle={{
+											backgroundColor: '#1f1f1f',
+											border: '1px solid rgba(255,255,255,0.1)',
+											borderRadius: 8,
+										}}
 										labelStyle={{ color: '#fff' }}
 										itemStyle={{ color: '#e03628' }}
 									/>

@@ -95,7 +95,13 @@ export function CreatePage() {
 	return (
 		<Box style={{ background: 'var(--glow-indigo)', minHeight: '100vh' }}>
 			<Container size="md" py="xl">
-				<Button variant="subtle" color="gray" mb="md" leftSection={<IconArrowLeft size={16} />} onClick={() => navigate('/')}>
+				<Button
+					variant="subtle"
+					color="gray"
+					mb="md"
+					leftSection={<IconArrowLeft size={16} />}
+					onClick={() => navigate('/')}
+				>
 					Back
 				</Button>
 				<Stack gap={4} mb="xl">
@@ -151,7 +157,13 @@ export function CreatePage() {
 							onClick={() => !creating && handleSelect(track)}
 						>
 							<Group>
-								<Image src={track.coverUrl ?? ''} w={64} h={64} radius="md" style={{ flexShrink: 0 }} />
+								<Image
+									src={track.coverUrl ?? ''}
+									w={64}
+									h={64}
+									radius="md"
+									style={{ flexShrink: 0 }}
+								/>
 								<Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
 									<Text fw={500} c="white" truncate>
 										{track.name}

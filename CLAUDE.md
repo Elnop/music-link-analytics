@@ -44,6 +44,7 @@ Required env vars: `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`. Optional: `SOUN
 The project is a monorepo with a root `package.json` that only coordinates scripts via `concurrently`. Backend and frontend each have their own `package.json`.
 
 **Backend** (`backend/src/`):
+
 - `index.ts` — entry point: runs migrations, seeds if empty, mounts Hono routes
 - `db/client.ts` — Kysely + better-sqlite3 instance; `db/schema.ts` — TypeScript table interfaces; `db/migrate.ts` — `createTable ifNotExists` migrations (no migration files, just imperative Kysely calls)
 - `services/spotify.ts` — Client Credentials OAuth with in-memory token cache (refreshes 60s before expiry). Exports `searchTracks` and `getTrack`
@@ -51,6 +52,7 @@ The project is a monorepo with a root `package.json` that only coordinates scrip
 - `routes/musicLinks.ts`, `routes/events.ts`, `routes/search.ts` — Hono route handlers
 
 **Frontend** (`frontend/src/`):
+
 - `api/` — typed fetch helpers that hit `/api/*` (proxied by Vite to `localhost:3001`)
 - `pages/` — four pages: `HomePage` (list all), `CreatePage` (search Spotify + create), `PublicPage` (`/music-link/:id`), `ReportPage` (`/music-link/:id/report` with Recharts)
 - `types/index.ts` — shared TypeScript interfaces (`MusicLink`, `SpotifyTrackResult`, `PlatformLinks`, `AnalyticsReport`)

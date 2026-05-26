@@ -117,7 +117,10 @@ musicLinks.post('/', async (c) => {
 				.select('id')
 				.where('spotify_track_id', '=', body.spotify_track_id)
 				.executeTakeFirst();
-			return c.json({ error: 'A music link for this track already exists.', id: existing?.id }, 409);
+			return c.json(
+				{ error: 'A music link for this track already exists.', id: existing?.id },
+				409,
+			);
 		}
 		throw err;
 	}
@@ -213,7 +216,14 @@ musicLinks.get('/:id/report', async (c) => {
 		clicksByDay[row.day] = Number(row.cnt);
 	}
 
-	return c.json({ totalViews: views, totalClicks: clicks, clickRate, clicksByPlatform, viewsByDay, clicksByDay });
+	return c.json({
+		totalViews: views,
+		totalClicks: clicks,
+		clickRate,
+		clicksByPlatform,
+		viewsByDay,
+		clicksByDay,
+	});
 });
 
 // GET /api/music-links/:id
