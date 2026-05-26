@@ -42,7 +42,7 @@ export function PublicPage() {
     musicLinksApi.get(id)
       .then((data) => {
         setLink(data)
-        eventsApi.trackView(id).catch(() => {})
+        eventsApi.trackView(id).catch((err) => console.error('[tracking] trackView failed:', err))
       })
       .catch((e: Error) => setError(e.message))
       .finally(() => setLoading(false))
@@ -57,7 +57,7 @@ export function PublicPage() {
 
   function handlePlatformClick(urlKey: string) {
     const url = link![urlKey as keyof MusicLink] as string
-    eventsApi.trackClick(link!.id, PLATFORM_KEY_MAP[urlKey]).catch(() => {})
+    eventsApi.trackClick(link!.id, PLATFORM_KEY_MAP[urlKey]).catch((err) => console.error('[tracking] trackClick failed:', err))
     window.open(url, '_blank', 'noopener,noreferrer')
   }
 

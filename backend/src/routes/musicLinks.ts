@@ -33,7 +33,8 @@ musicLinks.get('/', async (c) => {
           artist: track.artists[0]?.name ?? 'Unknown',
           coverUrl: track.album.images[0]?.url ?? '',
         }
-      } catch {
+      } catch (err) {
+        console.error(`[Spotify] failed to fetch track ${link.spotify_track_id}:`, err)
         trackMeta = { name: 'Unknown', artist: 'Unknown', coverUrl: '' }
       }
 
@@ -140,7 +141,9 @@ musicLinks.get('/:id', async (c) => {
       artist: track.artists[0]?.name ?? 'Unknown',
       coverUrl: track.album.images[0]?.url ?? '',
     }
-  } catch { /* fallback already set */ }
+  } catch (err) {
+    console.error(`[Spotify] failed to fetch track ${link.spotify_track_id}:`, err)
+  }
 
   return c.json({ ...link, ...trackMeta })
 })
