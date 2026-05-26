@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ApiError } from '../api/client';
 import {
 	Box,
 	Container,
@@ -15,6 +16,7 @@ import {
 	Center,
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
+import { IconSearch, IconArrowLeft } from '@tabler/icons-react';
 import { searchApi } from '../api/search';
 import { musicLinksApi } from '../api/musicLinks';
 import type { SpotifyTrackResult } from '../types';
@@ -60,11 +62,20 @@ export function CreatePage() {
 			notifications.show({ title: 'MusicLink created!', message: track.name, color: 'green' });
 			navigate(`/music-link/${musicLink.id}`);
 		} catch (e: unknown) {
-			notifications.show({
-				title: 'Error',
-				message: e instanceof Error ? e.message : 'Creation failed',
-				color: 'red',
-			});
+			if (e instanceof ApiError && e.status === 409 && e.data?.id) {
+				notifications.show({
+					title: 'Already exists',
+					message: 'A music link for this track already exists.',
+					color: 'yellow',
+				});
+				navigate(`/music-link/${e.data.id}`);
+			} else {
+				notifications.show({
+					title: 'Error',
+					message: e instanceof Error ? e.message : 'Creation failed',
+					color: 'red',
+				});
+			}
 		} finally {
 			setCreating(false);
 			setCreatingId(null);
@@ -74,8 +85,8 @@ export function CreatePage() {
 	return (
 		<Box style={{ background: 'var(--glow-indigo)', minHeight: '100vh' }}>
 			<Container size="md" py="xl">
-				<Button variant="subtle" color="gray" mb="md" onClick={() => navigate('/')}>
-					← Back
+				<Button variant="subtle" color="gray" mb="md" leftSection={<IconArrowLeft size={16} />} onClick={() => navigate('/')}>
+					Back
 				</Button>
 				<Stack gap={4} mb="xl">
 					<Title order={2} fw={500} c="white">
@@ -94,21 +105,7 @@ export function CreatePage() {
 						value={query}
 						onChange={(e) => setQuery(e.currentTarget.value)}
 						onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-						leftSection={
-							<svg
-								width="16"
-								height="16"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								strokeWidth="2"
-								strokeLinecap="round"
-								strokeLinejoin="round"
-							>
-								<circle cx="11" cy="11" r="8" />
-								<line x1="21" y1="21" x2="16.65" y2="16.65" />
-							</svg>
-						}
+						leftSection={<IconSearch size={16} />}
 					/>
 					<Button size="lg" color="customRed" onClick={handleSearch} loading={searching}>
 						Search

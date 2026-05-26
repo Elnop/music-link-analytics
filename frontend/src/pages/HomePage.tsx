@@ -14,6 +14,7 @@ import {
 	Stack,
 	Center,
 } from '@mantine/core';
+import { IconMusic } from '@tabler/icons-react';
 import { musicLinksApi } from '../api/musicLinks';
 import type { MusicLink } from '../types';
 
@@ -64,20 +65,7 @@ export function HomePage() {
 				{links.length === 0 ? (
 					<Center py={80}>
 						<Stack align="center" gap="md">
-							<svg
-								width="48"
-								height="48"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="rgba(255,255,255,0.2)"
-								strokeWidth="1.5"
-								strokeLinecap="round"
-								strokeLinejoin="round"
-							>
-								<path d="M9 18V5l12-2v13" />
-								<circle cx="6" cy="18" r="3" />
-								<circle cx="18" cy="16" r="3" />
-							</svg>
+							<IconMusic size={48} color="rgba(255,255,255,0.2)" stroke={1.5} />
 							<Text c="dimmed" ta="center">
 								No MusicLinks yet.
 							</Text>

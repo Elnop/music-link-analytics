@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { IconArrowLeft } from '@tabler/icons-react';
 import {
 	Box,
 	Container,
@@ -97,8 +98,8 @@ export function ReportPage() {
 	return (
 		<Box style={{ background: 'var(--glow-indigo)', minHeight: '100vh' }}>
 			<Container size="lg" py="xl">
-				<Button variant="subtle" color="gray" mb="md" onClick={() => navigate('/')}>
-					← Back
+				<Button variant="subtle" color="gray" mb="md" leftSection={<IconArrowLeft size={16} />} onClick={() => navigate('/')}>
+					Back
 				</Button>
 				<Title order={2} fw={500} c="white" mb="xl">
 					Analytics Report

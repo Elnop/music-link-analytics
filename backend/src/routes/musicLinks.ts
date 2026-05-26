@@ -77,7 +77,19 @@ musicLinks.post('/', async (c) => {
 		updated_at: now,
 	};
 
-	await kysely.insertInto('music_links').values(record).execute();
+	try {
+		await kysely.insertInto('music_links').values(record).execute();
+	} catch (err: any) {
+		if (err?.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+			const existing = await kysely
+				.selectFrom('music_links')
+				.select('id')
+				.where('spotify_track_id', '=', body.spotify_track_id)
+				.executeTakeFirst();
+			return c.json({ error: 'A music link for this track already exists.', id: existing?.id }, 409);
+		}
+		throw err;
+	}
 	return c.json(record, 201);
 });
 
