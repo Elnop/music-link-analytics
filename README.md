@@ -4,11 +4,11 @@ A full-stack mini-application to create shareable music pages and track analytic
 
 ## Stack
 
-| Layer | Technology |
-|-------|-----------|
+| Layer    | Technology                                                                 |
+| -------- | -------------------------------------------------------------------------- |
 | Frontend | Vite + React 19 + TypeScript + Mantine UI v9 + React Router v7 + RechartJS |
-| Backend | Node.js + TypeScript + Hono + Kysely + SQLite (better-sqlite3) |
-| APIs | Spotify Web API (Client Credentials) + Soundcharts (sandbox) |
+| Backend  | Node.js + TypeScript + Hono + Kysely + SQLite (better-sqlite3)             |
+| APIs     | Spotify Web API (Client Credentials) + Soundcharts (sandbox)               |
 
 ## Quick start
 
@@ -52,15 +52,15 @@ The Vite dev server proxies `/api` requests to the backend on port 3001, so Spot
 
 ## API endpoints
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | /api/music-links | List all MusicLinks with aggregated stats |
-| POST | /api/music-links | Create a new MusicLink |
-| GET | /api/music-links/:id | Get a MusicLink (with Spotify metadata) |
-| GET | /api/music-links/:id/report | Analytics report |
-| POST | /api/music-links/:id/events | Track a view or click |
-| GET | /api/search/spotify?query= | Search Spotify tracks |
-| GET | /api/tracks/:id/similar | Get platform links (Soundcharts) |
+| Method | Path                        | Description                               |
+| ------ | --------------------------- | ----------------------------------------- |
+| GET    | /api/music-links            | List all MusicLinks with aggregated stats |
+| POST   | /api/music-links            | Create a new MusicLink                    |
+| GET    | /api/music-links/:id        | Get a MusicLink (with Spotify metadata)   |
+| GET    | /api/music-links/:id/report | Analytics report                          |
+| POST   | /api/music-links/:id/events | Track a view or click                     |
+| GET    | /api/search/spotify?query=  | Search Spotify tracks                     |
+| GET    | /api/tracks/:id/similar     | Get platform links (Soundcharts)          |
 
 ## Technical choices
 
