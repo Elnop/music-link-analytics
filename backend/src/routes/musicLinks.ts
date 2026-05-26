@@ -3,6 +3,25 @@ import { nanoid } from 'nanoid';
 import { kysely } from '../db/client.js';
 import { getTrack } from '../services/spotify.js';
 
+const URL_FIELDS = [
+	'spotify_url',
+	'apple_music_url',
+	'deezer_url',
+	'youtube_url',
+	'soundcloud_url',
+] as const;
+
+function isSafeUrl(value: unknown): boolean {
+	if (value === null || value === undefined) return true;
+	if (typeof value !== 'string') return false;
+	try {
+		const { protocol } = new URL(value);
+		return protocol === 'https:' || protocol === 'http:';
+	} catch {
+		return false;
+	}
+}
+
 const musicLinks = new Hono();
 
 // GET /api/music-links — list with aggregated stats
@@ -66,6 +85,12 @@ musicLinks.post('/', async (c) => {
 	}
 
 	if (!body.spotify_track_id) return c.json({ error: 'spotify_track_id is required' }, 400);
+
+	for (const field of URL_FIELDS) {
+		if (!isSafeUrl(body[field])) {
+			return c.json({ error: `${field} must be a valid http/https URL or null` }, 400);
+		}
+	}
 
 	const now = new Date().toISOString();
 	const id = nanoid(10);
