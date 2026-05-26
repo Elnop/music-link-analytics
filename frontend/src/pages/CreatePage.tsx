@@ -1,18 +1,18 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+	Box,
 	Container,
 	Title,
 	TextInput,
 	Button,
-	Card,
 	Image,
 	Text,
 	Group,
 	Loader,
 	Alert,
 	Stack,
-	Badge,
+	Center,
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { searchApi } from '../api/search';
@@ -24,6 +24,7 @@ export function CreatePage() {
 	const [results, setResults] = useState<SpotifyTrackResult[]>([]);
 	const [searching, setSearching] = useState(false);
 	const [creating, setCreating] = useState(false);
+	const [creatingId, setCreatingId] = useState<string | null>(null);
 	const [searchError, setSearchError] = useState<string | null>(null);
 	const [hasSearched, setHasSearched] = useState(false);
 	const navigate = useNavigate();
@@ -45,6 +46,7 @@ export function CreatePage() {
 
 	async function handleSelect(track: SpotifyTrackResult) {
 		setCreating(true);
+		setCreatingId(track.id);
 		try {
 			const platformLinks = await searchApi.similarTracks(track.id);
 			const musicLink = await musicLinksApi.create({
@@ -65,75 +67,113 @@ export function CreatePage() {
 			});
 		} finally {
 			setCreating(false);
+			setCreatingId(null);
 		}
 	}
 
 	return (
-		<Container size="md" py="xl">
-			<Button variant="subtle" mb="md" onClick={() => navigate('/')}>
-				← Back
-			</Button>
-			<Title order={2} mb="xl">
-				Create a new MusicLink
-			</Title>
-
-			<Group mb="md">
-				<TextInput
-					flex={1}
-					placeholder="Search a track (e.g. Daft Punk, Bohemian Rhapsody...)"
-					value={query}
-					onChange={(e) => setQuery(e.currentTarget.value)}
-					onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-				/>
-				<Button onClick={handleSearch} loading={searching}>
-					Search
+		<Box style={{ background: 'var(--glow-indigo)', minHeight: '100vh' }}>
+			<Container size="md" py="xl">
+				<Button variant="subtle" color="gray" mb="md" onClick={() => navigate('/')}>
+					← Back
 				</Button>
-			</Group>
+				<Stack gap={4} mb="xl">
+					<Title order={2} fw={500} c="white">
+						Create a new MusicLink
+					</Title>
+					<Text c="dimmed" size="sm">
+						Search a track and we'll find it on every platform.
+					</Text>
+				</Stack>
 
-			{searchError && (
-				<Alert color="red" mb="md">
-					{searchError}
-				</Alert>
-			)}
-
-			{creating && (
-				<Group justify="center" py="xl">
-					<Loader />
-					<Text>Creating MusicLink...</Text>
+				<Group mb="md">
+					<TextInput
+						flex={1}
+						size="lg"
+						placeholder="Search a track (e.g. Daft Punk, Bohemian Rhapsody...)"
+						value={query}
+						onChange={(e) => setQuery(e.currentTarget.value)}
+						onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+						leftSection={
+							<svg
+								width="16"
+								height="16"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+							>
+								<circle cx="11" cy="11" r="8" />
+								<line x1="21" y1="21" x2="16.65" y2="16.65" />
+							</svg>
+						}
+					/>
+					<Button size="lg" color="customRed" onClick={handleSearch} loading={searching}>
+						Search
+					</Button>
 				</Group>
-			)}
 
-			{hasSearched && !searching && results.length === 0 && !searchError && (
-				<Text c="dimmed" ta="center" py="xl">
-					No tracks found for "{query}".
-				</Text>
-			)}
+				{searchError && (
+					<Alert color="red" mb="md">
+						{searchError}
+					</Alert>
+				)}
 
-			<Stack gap="sm">
-				{results.map((track) => (
-					<Card
-						key={track.id}
-						withBorder
-						padding="sm"
-						style={{ cursor: 'pointer' }}
-						onClick={() => !creating && handleSelect(track)}
-					>
-						<Group>
-							<Image src={track.coverUrl ?? ''} w={56} h={56} radius="sm" />
-							<Stack gap={2} flex={1}>
-								<Text fw={600}>{track.name}</Text>
-								<Text size="sm" c="dimmed">
-									{track.artist}
-								</Text>
-							</Stack>
-							<Badge variant="outline">
-								{Math.floor(track.durationMs / 60000)}:
-								{String(Math.floor((track.durationMs % 60000) / 1000)).padStart(2, '0')}
-							</Badge>
-						</Group>
-					</Card>
-				))}
-			</Stack>
-		</Container>
+				{hasSearched && !searching && results.length === 0 && !searchError && (
+					<Text c="dimmed" ta="center" py="xl">
+						No tracks found for "{query}".
+					</Text>
+				)}
+
+				<Stack gap="sm">
+					{results.map((track) => (
+						<Box
+							key={track.id}
+							className="track-result-card"
+							style={{
+								backgroundColor: '#242424',
+								border: '1px solid rgba(255,255,255,0.1)',
+								borderRadius: '10px',
+								padding: '14px 16px',
+								cursor: creating ? 'default' : 'pointer',
+								position: 'relative',
+								overflow: 'hidden',
+							}}
+							onClick={() => !creating && handleSelect(track)}
+						>
+							<Group>
+								<Image src={track.coverUrl ?? ''} w={64} h={64} radius="md" style={{ flexShrink: 0 }} />
+								<Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
+									<Text fw={500} c="white" truncate>
+										{track.name}
+									</Text>
+									<Text size="sm" c="dimmed">
+										{track.artist}
+									</Text>
+									<Text size="xs" c="dimmed">
+										{Math.floor(track.durationMs / 60000)}:
+										{String(Math.floor((track.durationMs % 60000) / 1000)).padStart(2, '0')}
+									</Text>
+								</Stack>
+							</Group>
+							{creatingId === track.id && (
+								<Center
+									style={{
+										position: 'absolute',
+										inset: 0,
+										backgroundColor: 'rgba(0,0,0,0.6)',
+										borderRadius: '10px',
+									}}
+								>
+									<Loader color="customRed" size="sm" />
+								</Center>
+							)}
+						</Box>
+					))}
+				</Stack>
+			</Container>
+		</Box>
 	);
 }

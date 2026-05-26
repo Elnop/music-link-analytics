@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+	Box,
 	Container,
 	Title,
 	Button,
-	Table,
 	Image,
 	Text,
 	Group,
@@ -12,6 +12,7 @@ import {
 	Loader,
 	Alert,
 	Stack,
+	Center,
 } from '@mantine/core';
 import { musicLinksApi } from '../api/musicLinks';
 import type { MusicLink } from '../types';
@@ -30,7 +31,12 @@ export function HomePage() {
 			.finally(() => setLoading(false));
 	}, []);
 
-	if (loading) return <Loader style={{ display: 'block', margin: '80px auto' }} />;
+	if (loading)
+		return (
+			<Center h="100vh">
+				<Loader color="customRed" />
+			</Center>
+		);
 	if (error)
 		return (
 			<Alert color="red" title="Error" m="xl">
@@ -39,71 +45,125 @@ export function HomePage() {
 		);
 
 	return (
-		<Container size="lg" py="xl">
-			<Group justify="space-between" mb="xl">
-				<Title order={1}>MusicLink Analytics</Title>
-				<Button onClick={() => navigate('/create')}>+ New MusicLink</Button>
-			</Group>
+		<Box style={{ background: 'var(--glow-indigo)', minHeight: '100vh' }}>
+			<Container size="lg" py="xl">
+				<Group justify="space-between" mb="xl">
+					<Stack gap={4}>
+						<Title order={1} fw={500} c="white">
+							MusicLink Analytics
+						</Title>
+						<Text c="dimmed" size="sm">
+							Your music, everywhere
+						</Text>
+					</Stack>
+					<Button color="customRed" radius="md" onClick={() => navigate('/create')}>
+						+ New MusicLink
+					</Button>
+				</Group>
 
-			{links.length === 0 ? (
-				<Text c="dimmed" ta="center" mt="xl">
-					No MusicLinks yet. Create your first one!
-				</Text>
-			) : (
-				<Table striped highlightOnHover>
-					<Table.Thead>
-						<Table.Tr>
-							<Table.Th>Track</Table.Th>
-							<Table.Th>Artist</Table.Th>
-							<Table.Th>Created</Table.Th>
-							<Table.Th>Views</Table.Th>
-							<Table.Th>Clicks</Table.Th>
-							<Table.Th>Actions</Table.Th>
-						</Table.Tr>
-					</Table.Thead>
-					<Table.Tbody>
+				{links.length === 0 ? (
+					<Center py={80}>
+						<Stack align="center" gap="md">
+							<svg
+								width="48"
+								height="48"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="rgba(255,255,255,0.2)"
+								strokeWidth="1.5"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+							>
+								<path d="M9 18V5l12-2v13" />
+								<circle cx="6" cy="18" r="3" />
+								<circle cx="18" cy="16" r="3" />
+							</svg>
+							<Text c="dimmed" ta="center">
+								No MusicLinks yet.
+							</Text>
+							<Button color="customRed" radius="md" onClick={() => navigate('/create')}>
+								Create your first one
+							</Button>
+						</Stack>
+					</Center>
+				) : (
+					<Stack gap="sm">
 						{links.map((link) => (
-							<Table.Tr key={link.id}>
-								<Table.Td>
-									<Group gap="sm">
-										{link.coverUrl && <Image src={link.coverUrl} w={40} h={40} radius="sm" />}
-										<Text fw={500}>{link.name}</Text>
+							<Box
+								key={link.id}
+								className="music-link-card"
+								style={{
+									backgroundColor: '#242424',
+									border: '1px solid rgba(255,255,255,0.1)',
+									borderRadius: '10px',
+									padding: '16px 20px',
+								}}
+							>
+								<Group justify="space-between" wrap="nowrap">
+									<Group gap="md" wrap="nowrap" style={{ flex: 1, minWidth: 0 }}>
+										{link.coverUrl && (
+											<Image
+												src={link.coverUrl}
+												w={56}
+												h={56}
+												radius="sm"
+												style={{ flexShrink: 0 }}
+											/>
+										)}
+										<Stack gap={2} style={{ minWidth: 0 }}>
+											<Text fw={500} c="white" truncate>
+												{link.name}
+											</Text>
+											<Text size="sm" c="dimmed" truncate>
+												{link.artist}
+											</Text>
+											<Text size="xs" c="dimmed">
+												{new Date(link.created_at).toLocaleDateString()}
+											</Text>
+										</Stack>
 									</Group>
-								</Table.Td>
-								<Table.Td>{link.artist}</Table.Td>
-								<Table.Td>{new Date(link.created_at).toLocaleDateString()}</Table.Td>
-								<Table.Td>
-									<Badge variant="light">{link.views}</Badge>
-								</Table.Td>
-								<Table.Td>
-									<Badge variant="light" color="green">
-										{link.clicks}
-									</Badge>
-								</Table.Td>
-								<Table.Td>
-									<Stack gap={4}>
-										<Button
-											size="xs"
-											variant="subtle"
-											onClick={() => navigate(`/music-link/${link.id}`)}
-										>
-											Open
-										</Button>
-										<Button
-											size="xs"
-											variant="subtle"
-											color="grape"
-											onClick={() => navigate(`/music-link/${link.id}/report`)}
-										>
-											Report
-										</Button>
-									</Stack>
-								</Table.Td>
-							</Table.Tr>
+									<Group gap="lg" wrap="nowrap" style={{ flexShrink: 0 }}>
+										<Stack gap={2} align="center">
+											<Badge variant="light" color="blue" size="sm">
+												{link.views}
+											</Badge>
+											<Text size="xs" c="dimmed">
+												views
+											</Text>
+										</Stack>
+										<Stack gap={2} align="center">
+											<Badge variant="light" color="green" size="sm">
+												{link.clicks}
+											</Badge>
+											<Text size="xs" c="dimmed">
+												clicks
+											</Text>
+										</Stack>
+										<Group gap="xs">
+											<Button
+												size="xs"
+												variant="subtle"
+												color="gray"
+												onClick={() => navigate(`/music-link/${link.id}`)}
+											>
+												Open
+											</Button>
+											<Button
+												size="xs"
+												variant="subtle"
+												color="customRed"
+												onClick={() => navigate(`/music-link/${link.id}/report`)}
+											>
+												Report
+											</Button>
+										</Group>
+									</Group>
+								</Group>
+							</Box>
 						))}
-					</Table.Tbody>
-				</Table>
-			)}
-		</Container>
+					</Stack>
+				)}
+			</Container>
+		</Box>
 	);
 }
