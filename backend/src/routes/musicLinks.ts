@@ -51,14 +51,19 @@ musicLinks.get('/', async (c) => {
 
 // POST /api/music-links — create
 musicLinks.post('/', async (c) => {
-	const body = await c.req.json<{
+	let body: {
 		spotify_track_id: string;
 		spotify_url: string | null;
 		apple_music_url: string | null;
 		deezer_url: string | null;
 		youtube_url: string | null;
 		soundcloud_url: string | null;
-	}>();
+	};
+	try {
+		body = await c.req.json();
+	} catch {
+		return c.json({ error: 'Request body must be valid JSON' }, 400);
+	}
 
 	if (!body.spotify_track_id) return c.json({ error: 'spotify_track_id is required' }, 400);
 
@@ -90,7 +95,20 @@ musicLinks.post('/', async (c) => {
 		}
 		throw err;
 	}
-	return c.json(record, 201);
+
+	let trackMeta = { name: 'Unknown', artist: 'Unknown', coverUrl: '' };
+	try {
+		const track = await getTrack(record.spotify_track_id);
+		trackMeta = {
+			name: track.name,
+			artist: track.artists[0]?.name ?? 'Unknown',
+			coverUrl: track.album.images[0]?.url ?? '',
+		};
+	} catch (err) {
+		console.error(`[Spotify] failed to fetch track ${record.spotify_track_id}:`, err);
+	}
+
+	return c.json({ ...record, ...trackMeta, views: 0, clicks: 0 }, 201);
 });
 
 // GET /api/music-links/:id/report — analytics report (MUST be before /:id)
