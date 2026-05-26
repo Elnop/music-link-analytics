@@ -5,7 +5,7 @@
 	"scripts": {
 		"dev": "tsx watch src/index.ts",
 		"seed": "tsx src/seed.ts",
-		"build": "tsc",
+		"build": "tsc && npm rebuild better-sqlite3",
 		"format": "prettier --write \"src/**/*.{ts,json}\"",
 		"format:check": "prettier --check \"src/**/*.{ts,json}\""
 	},
