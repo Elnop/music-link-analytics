@@ -6,4 +6,6 @@ build/
 *.log
 .DS_Store
 subject/
-./data/
+data/
+docs/
+package-lock.json
