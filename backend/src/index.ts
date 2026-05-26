@@ -4,7 +4,7 @@ import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { runMigrations } from './db/migrate.js';
-import { seedIfEmpty } from './seed.js';
+import { seedIfEmpty } from './scripts/seed.js';
 import { search } from './routes/search.js';
 import { musicLinks } from './routes/musicLinks.js';
 import { events } from './routes/events.js';

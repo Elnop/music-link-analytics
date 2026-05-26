@@ -111,25 +111,25 @@ export function HomePage() {
 										</Stack>
 									</Group>
 									<Group gap="lg" wrap="nowrap" style={{ flexShrink: 0 }}>
-										<Stack gap={2} align="center">
-											<Badge variant="light" color="blue" size="sm">
+										<Stack gap={4} align="center">
+											<Badge variant="light" color="blue" size="lg">
 												{link.views}
 											</Badge>
-											<Text size="xs" c="dimmed">
+											<Text size="sm" c="dimmed">
 												views
 											</Text>
 										</Stack>
-										<Stack gap={2} align="center">
-											<Badge variant="light" color="green" size="sm">
+										<Stack gap={4} align="center">
+											<Badge variant="light" color="green" size="lg">
 												{link.clicks}
 											</Badge>
-											<Text size="xs" c="dimmed">
+											<Text size="sm" c="dimmed">
 												clicks
 											</Text>
 										</Stack>
-										<Group gap="xs">
+										<Group gap="sm">
 											<Button
-												size="xs"
+												size="sm"
 												variant="subtle"
 												color="gray"
 												onClick={() => navigate(`/music-link/${link.id}`)}
@@ -137,12 +137,12 @@ export function HomePage() {
 												Open
 											</Button>
 											<Button
-												size="xs"
+												size="sm"
 												variant="subtle"
-												color="customRed"
+												color="blue"
 												onClick={() => navigate(`/music-link/${link.id}/report`)}
 											>
-												Report
+												Stats
 											</Button>
 										</Group>
 									</Group>

@@ -1,16 +1,16 @@
 import 'dotenv/config';
 import { mkdirSync } from 'node:fs';
-import { getTrack } from './services/spotify.js';
-import { getPlatformLinks } from './services/soundcharts.js';
-import { kysely } from './db/client.js';
-import { runMigrations } from './db/migrate.js';
+import { getTrack } from '../services/spotify.js';
+import { getPlatformLinks } from '../services/soundcharts.js';
+import { kysely } from '../db/client.js';
+import { runMigrations } from '../db/migrate.js';
 import { nanoid } from 'nanoid';
 
-// Verified Spotify track IDs
+// Tracks covered by the Soundcharts sandbox (Billie Eilish & Tones and I)
 const SEED_TRACK_IDS = [
-	'00RHrZB3i6B6PwX30ouZBK', // Cerrone — Supernature
-	'5WZL03aLF9GVNaa5Q6ATNe', // Catching Feelings
-	'1VVQr6FqSlH0pvjZoOaj5T', // Lovebox
+	'2Fxmhks0bxGSBdJ92vM42m', // Billie Eilish — bad guy
+	'4SSnFejRGlZikf02HLewEF', // Billie Eilish — bury a friend
+	'2N8m6CYs74qQO4mjVcXO30', // Tones and I — Dance Monkey
 ];
 
 async function seedTracks() {
