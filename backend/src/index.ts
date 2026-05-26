@@ -8,6 +8,7 @@ import { seedIfEmpty } from './scripts/seed.js';
 import { search } from './routes/search.js';
 import { musicLinks } from './routes/musicLinks.js';
 import { events } from './routes/events.js';
+import { preview } from './routes/preview.js';
 
 mkdirSync('./data', { recursive: true });
 await runMigrations();
@@ -21,6 +22,7 @@ app.route('/api/search', search);
 app.route('/api/tracks', search);
 app.route('/api/music-links', musicLinks);
 app.route('/api/music-links', events);
+app.route('/music-link', preview);
 
 const port = Number(process.env.PORT) || 3001;
 serve({ fetch: app.fetch, port }, () => {
