@@ -1,4 +1,5 @@
 import { kysely } from './client.js';
+import { sql } from 'kysely';
 
 export async function runMigrations() {
 	await kysely.schema
@@ -20,7 +21,9 @@ export async function runMigrations() {
 		.ifNotExists()
 		.addColumn('id', 'text', (col) => col.primaryKey().notNull())
 		.addColumn('music_link_id', 'text', (col) => col.notNull().references('music_links.id'))
-		.addColumn('event_type', 'text', (col) => col.notNull())
+		.addColumn('event_type', 'text', (col) =>
+			col.notNull().check(sql`event_type IN ('page_view', 'platform_click')`),
+		)
 		.addColumn('platform', 'text')
 		.addColumn('created_at', 'text', (col) => col.notNull())
 		.execute();
