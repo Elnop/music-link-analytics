@@ -72,7 +72,7 @@ export function CreatePage() {
 			notifications.show({ title: 'MusicLink created!', message: track.name, color: 'green' });
 			navigate(`/music-link/${musicLink.id}`);
 		} catch (e: unknown) {
-			if (e instanceof ApiError && e.status === 409 && e.data?.id) {
+			if (e instanceof ApiError && e.status === 409 && typeof e.data?.id === 'string') {
 				notifications.show({
 					title: 'Already exists',
 					message: 'A music link for this track already exists.',
