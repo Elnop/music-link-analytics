@@ -1,5 +1,4 @@
-// Soundcharts is mocked — see README for rationale.
-// Interface mirrors what a real integration would return so swapping is trivial.
+const BASE_URL = 'https://customer.api.soundcharts.com'
 
 export interface PlatformLinks {
   spotify_url: string | null
@@ -9,25 +8,55 @@ export interface PlatformLinks {
   soundcloud_url: string | null
 }
 
-const MOCK_PLATFORM_LINKS: PlatformLinks[] = [
-  {
-    spotify_url: null,
-    apple_music_url: 'https://music.apple.com/us/album/mock-track/123456789',
-    deezer_url: 'https://www.deezer.com/track/123456789',
-    youtube_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    soundcloud_url: 'https://soundcloud.com/mock-artist/mock-track',
-  },
-  {
-    spotify_url: null,
-    apple_music_url: 'https://music.apple.com/us/album/mock-track-b/987654321',
-    deezer_url: 'https://www.deezer.com/track/987654321',
-    youtube_url: null,
-    soundcloud_url: 'https://soundcloud.com/mock-artist/mock-track-b',
-  },
-]
+const NULL_LINKS: PlatformLinks = {
+  spotify_url: null,
+  apple_music_url: null,
+  deezer_url: null,
+  youtube_url: null,
+  soundcloud_url: null,
+}
 
-export async function getPlatformLinks(_spotifyTrackId: string): Promise<PlatformLinks> {
-  // In production: call Soundcharts API with spotifyTrackId to get cross-platform links
-  const mock = MOCK_PLATFORM_LINKS[Math.floor(Math.random() * MOCK_PLATFORM_LINKS.length)]
-  return Promise.resolve(mock)
+function getHeaders(): Record<string, string> {
+  return {
+    'x-app-id': process.env.SOUNDCHARTS_APP_ID ?? '',
+    'x-api-key': process.env.SOUNDCHARTS_API_KEY ?? '',
+  }
+}
+
+async function getSoundchartsUuid(spotifyTrackId: string): Promise<string | null> {
+  const res = await fetch(
+    `${BASE_URL}/api/v2/song/by-platform/spotify/${spotifyTrackId}`,
+    { headers: getHeaders() },
+  )
+  if (!res.ok) return null
+  const data = await res.json() as { type: string; object: { uuid: string }; errors: unknown[] }
+  if (data.errors?.length || !data.object?.uuid) return null
+  return data.object.uuid
+}
+
+async function getUrlForPlatform(uuid: string, platform: string): Promise<string | null> {
+  const res = await fetch(
+    `${BASE_URL}/api/v2/song/${uuid}/identifiers?platform=${platform}&limit=5`,
+    { headers: getHeaders() },
+  )
+  if (!res.ok) return null
+  const data = await res.json() as { items: { platformCode: string; url: string }[]; errors: unknown[] }
+  if (data.errors?.length) return null
+  return data.items?.find((i) => i.url)?.url ?? null
+}
+
+export async function getPlatformLinks(spotifyTrackId: string): Promise<PlatformLinks> {
+  const uuid = await getSoundchartsUuid(spotifyTrackId)
+  if (!uuid) return NULL_LINKS
+
+  const [spotify_url, apple_music_url, deezer_url, youtube_url, soundcloud_url] =
+    await Promise.all([
+      getUrlForPlatform(uuid, 'spotify'),
+      getUrlForPlatform(uuid, 'apple-music'),
+      getUrlForPlatform(uuid, 'deezer'),
+      getUrlForPlatform(uuid, 'youtube'),
+      getUrlForPlatform(uuid, 'soundcloud'),
+    ])
+
+  return { spotify_url, apple_music_url, deezer_url, youtube_url, soundcloud_url }
 }

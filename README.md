@@ -8,7 +8,7 @@ A full-stack mini-application to create shareable music pages and track analytic
 |-------|-----------|
 | Frontend | Vite + React 19 + TypeScript + Mantine UI v9 + React Router v7 + RechartJS |
 | Backend | Node.js + TypeScript + Hono + Kysely + SQLite (better-sqlite3) |
-| APIs | Spotify Web API (Client Credentials) + Soundcharts (mocked) |
+| APIs | Spotify Web API (Client Credentials) + Soundcharts (sandbox) |
 
 ## Quick start
 
@@ -21,6 +21,7 @@ cp backend/.env.example backend/.env
 # Edit backend/.env and fill in your Spotify credentials:
 # SPOTIFY_CLIENT_ID=...
 # SPOTIFY_CLIENT_SECRET=...
+# Soundcharts sandbox credentials are pre-filled (soundcharts/soundcharts)
 
 # 3. Start both servers
 npm run dev
@@ -44,7 +45,7 @@ music-link-analytics/
     └── src/
         ├── db/              # Kysely schema, client, migrations
         ├── routes/          # musicLinks, events, search
-        └── services/        # spotify (real), soundcharts (mocked)
+        └── services/        # spotify (real), soundcharts (sandbox)
 ```
 
 The Vite dev server proxies `/api` requests to the backend on port 3001, so Spotify credentials are never exposed to the browser.
@@ -69,13 +70,13 @@ The Vite dev server proxies `/api` requests to the backend on port 3001, so Spot
 
 **SQLite only stores `spotify_track_id` + platform URLs**: track metadata (title, artist, cover) is fetched from Spotify on demand. This avoids data duplication but creates a dependency on Spotify for display — see Potential improvements.
 
-**Soundcharts mocked**: The Soundcharts sandbox requires an approval process. The mock (`backend/src/services/soundcharts.ts`) implements the same interface a real integration would use — swapping in the real API only requires changing that one file.
+**Soundcharts sandbox**: Integrated via the public sandbox (`customer.api.soundcharts.com`). The two-step flow fetches the Soundcharts song UUID from a Spotify track ID, then retrieves cross-platform URLs. The sandbox only covers a fixed whitelist of tracks (Billie Eilish, Tones & I) — tracks outside the whitelist return `null` platform links gracefully.
 
 **tsx** for TypeScript execution: uses `tsx watch` instead of `node --experimental-strip-types` because Node's experimental flag does not remap `.js` imports to `.ts` files, which is required for NodeNext ESM resolution.
 
 ## Limitations
 
-- Soundcharts integration is mocked (platform links are realistic but not real)
+- Soundcharts sandbox only covers a whitelist of tracks (Billie Eilish, Tones & I) — other tracks return `null` platform links
 - No pagination on the MusicLinks list
 - The UNIQUE constraint on `spotify_track_id` prevents creating two MusicLinks for the same Spotify track
 - Track metadata (title, artist, cover) requires a live Spotify API connection — if Spotify is unavailable, it falls back to "Unknown"
@@ -84,6 +85,6 @@ The Vite dev server proxies `/api` requests to the backend on port 3001, so Spot
 
 - **Denormalize track metadata** (title, artist, cover) into the `music_links` table at creation time — eliminates the Spotify dependency on the public page critical path and enables batch queries
 - **Batch Spotify metadata** on the list page using `/tracks?ids=...` (up to 50 tracks per request) to reduce N+1 API calls
-- **Real Soundcharts integration** once sandbox access is approved
+- **Soundcharts production access** — swap sandbox credentials for production ones to cover all tracks
 - **Pagination** for the MusicLinks list
 - **Error boundary** in the React app for graceful degradation
