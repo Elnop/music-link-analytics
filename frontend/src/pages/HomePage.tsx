@@ -16,10 +16,10 @@ import {
 } from '@mantine/core';
 import { IconMusic } from '@tabler/icons-react';
 import { musicLinksApi } from '../api/musicLinks';
-import type { MusicLink } from '../types';
+import type { MusicLinkListItem } from '../types';
 
 export function HomePage() {
-	const [links, setLinks] = useState<MusicLink[]>([]);
+	const [links, setLinks] = useState<MusicLinkListItem[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const navigate = useNavigate();

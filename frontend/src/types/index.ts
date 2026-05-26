@@ -8,10 +8,13 @@ export interface MusicLink {
 	soundcloud_url: string | null;
 	created_at: string;
 	updated_at: string;
-	// enriched by backend
+	// enriched by backend on all endpoints
 	name: string;
 	artist: string;
 	coverUrl: string;
+}
+
+export interface MusicLinkListItem extends MusicLink {
 	views: number;
 	clicks: number;
 }

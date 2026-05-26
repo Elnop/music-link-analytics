@@ -1,8 +1,8 @@
 import { apiFetch } from './client';
-import type { MusicLink, AnalyticsReport } from '../types';
+import type { MusicLink, MusicLinkListItem, AnalyticsReport } from '../types';
 
 export const musicLinksApi = {
-	list: () => apiFetch<MusicLink[]>('/music-links'),
+	list: () => apiFetch<MusicLinkListItem[]>('/music-links'),
 	get: (id: string) => apiFetch<MusicLink>(`/music-links/${id}`),
 	create: (payload: {
 		spotify_track_id: string;
