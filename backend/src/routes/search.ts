@@ -8,10 +8,13 @@ search.get('/spotify', async (c) => {
 	const query = c.req.query('query');
 	if (!query) return c.json({ error: 'query param required' }, 400);
 
+	const offset = Math.max(0, parseInt(c.req.query('offset') ?? '0', 10) || 0);
+	const limit = 10;
+
 	try {
-		const tracks = await searchTracks(query);
-		return c.json(
-			tracks.map((t) => ({
+		const { items, total } = await searchTracks(query, limit, offset);
+		return c.json({
+			results: items.map((t) => ({
 				id: t.id,
 				name: t.name,
 				artist: t.artists[0]?.name ?? 'Unknown',
@@ -19,7 +22,10 @@ search.get('/spotify', async (c) => {
 				spotifyUrl: t.external_urls.spotify,
 				durationMs: t.duration_ms,
 			})),
-		);
+			total,
+			offset,
+			limit,
+		});
 	} catch (err) {
 		console.error(err);
 		return c.json({ error: 'Spotify search failed' }, 502);

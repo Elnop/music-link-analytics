@@ -25,6 +25,13 @@ export interface SpotifyTrackResult {
 	durationMs: number;
 }
 
+export interface SpotifySearchResult {
+	results: SpotifyTrackResult[];
+	total: number;
+	offset: number;
+	limit: number;
+}
+
 export interface PlatformLinks {
 	spotify_url: string | null;
 	apple_music_url: string | null;

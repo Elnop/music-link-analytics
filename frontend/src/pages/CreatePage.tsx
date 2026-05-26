@@ -24,6 +24,9 @@ import type { SpotifyTrackResult } from '../types';
 export function CreatePage() {
 	const [query, setQuery] = useState('');
 	const [results, setResults] = useState<SpotifyTrackResult[]>([]);
+	const [total, setTotal] = useState(0);
+	const [offset, setOffset] = useState(0);
+	const LIMIT = 10;
 	const [searching, setSearching] = useState(false);
 	const [creating, setCreating] = useState(false);
 	const [creatingId, setCreatingId] = useState<string | null>(null);
@@ -31,19 +34,26 @@ export function CreatePage() {
 	const [hasSearched, setHasSearched] = useState(false);
 	const navigate = useNavigate();
 
-	async function handleSearch() {
+	async function fetchPage(pageOffset: number) {
 		if (!query.trim()) return;
 		setSearching(true);
 		setSearchError(null);
 		try {
-			const tracks = await searchApi.spotify(query);
-			setResults(tracks);
+			const data = await searchApi.spotify(query, pageOffset);
+			setResults(data.results);
+			setTotal(data.total);
+			setOffset(pageOffset);
 			setHasSearched(true);
 		} catch (e: unknown) {
 			setSearchError(e instanceof Error ? e.message : 'Search failed');
 		} finally {
 			setSearching(false);
 		}
+	}
+
+	async function handleSearch() {
+		setOffset(0);
+		await fetchPage(0);
 	}
 
 	async function handleSelect(track: SpotifyTrackResult) {
@@ -170,6 +180,30 @@ export function CreatePage() {
 						</Box>
 					))}
 				</Stack>
+
+				{hasSearched && total > LIMIT && (
+					<Group justify="center" mt="md">
+						<Button
+							variant="subtle"
+							color="gray"
+							disabled={offset === 0 || searching}
+							onClick={() => fetchPage(offset - LIMIT)}
+						>
+							Previous
+						</Button>
+						<Text c="dimmed" size="sm">
+							{offset + 1}–{Math.min(offset + LIMIT, total)} of {total}
+						</Text>
+						<Button
+							variant="subtle"
+							color="gray"
+							disabled={offset + LIMIT >= total || searching}
+							onClick={() => fetchPage(offset + LIMIT)}
+						>
+							Next
+						</Button>
+					</Group>
+				)}
 			</Container>
 		</Box>
 	);

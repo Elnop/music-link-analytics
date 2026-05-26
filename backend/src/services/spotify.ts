@@ -13,7 +13,7 @@ interface SpotifyTrack {
 }
 
 interface SpotifySearchResponse {
-	tracks: { items: SpotifyTrack[] };
+	tracks: { items: SpotifyTrack[]; total: number };
 }
 
 let tokenCache: TokenCache | null = null;
@@ -50,13 +50,17 @@ async function getAccessToken(): Promise<string> {
 	return tokenCache.accessToken;
 }
 
-export async function searchTracks(query: string): Promise<SpotifyTrack[]> {
+export async function searchTracks(
+	query: string,
+	limit = 10,
+	offset = 0,
+): Promise<{ items: SpotifyTrack[]; total: number }> {
 	const token = await getAccessToken();
-	const url = `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=10`;
+	const url = `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=${limit}&offset=${offset}`;
 	const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
 	if (!res.ok) throw new Error(`Spotify search error: ${res.status}`);
 	const data = (await res.json()) as SpotifySearchResponse;
-	return data.tracks.items;
+	return { items: data.tracks.items, total: data.tracks.total };
 }
 
 export async function getTrack(trackId: string): Promise<SpotifyTrack> {
