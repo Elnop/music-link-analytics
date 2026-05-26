@@ -49,7 +49,7 @@ musicLinks.get('/', async (c) => {
 				.where('event_type', '=', 'platform_click')
 				.execute();
 
-			let trackMeta: { name: string; artist: string; coverUrl: string } | null = null;
+			let trackMeta: { name: string; artist: string; coverUrl: string };
 			try {
 				const track = await getTrack(link.spotify_track_id);
 				trackMeta = {
@@ -110,8 +110,8 @@ musicLinks.post('/', async (c) => {
 
 	try {
 		await kysely.insertInto('music_links').values(record).execute();
-	} catch (err: any) {
-		if (err?.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+	} catch (err: unknown) {
+		if (typeof err === 'object' && err !== null && 'code' in err && err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
 			const existing = await kysely
 				.selectFrom('music_links')
 				.select('id')

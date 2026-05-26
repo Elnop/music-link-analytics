@@ -7,7 +7,9 @@
 		"seed": "tsx src/scripts/seed.ts",
 		"build": "tsc && npm rebuild better-sqlite3",
 		"format": "prettier --write \"src/**/*.{ts,json}\"",
-		"format:check": "prettier --check \"src/**/*.{ts,json}\""
+		"format:check": "prettier --check \"src/**/*.{ts,json}\"",
+		"typecheck": "tsc --noEmit",
+		"lint": "eslint ."
 	},
 	"dependencies": {
 		"@hono/node-server": "^1.12.0",
@@ -18,10 +20,14 @@
 		"nanoid": "^5.0.7"
 	},
 	"devDependencies": {
+		"@eslint/js": "^10.0.1",
 		"@types/better-sqlite3": "^7.6.11",
 		"@types/node": "^20.0.0",
+		"eslint": "^10.4.0",
+		"globals": "^17.6.0",
 		"prettier": "^3.8.3",
 		"tsx": "^4.22.3",
-		"typescript": "^5.5.0"
+		"typescript": "^5.5.0",
+		"typescript-eslint": "^8.60.0"
 	}
 }

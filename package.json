@@ -6,7 +6,9 @@
 		"seed": "npm run seed --prefix backend",
 		"install:all": "npm install && npm install --prefix frontend && npm install --prefix backend",
 		"format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css}\"",
-		"format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,css}\""
+		"format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,css}\"",
+		"typecheck": "npm run typecheck --prefix frontend && npm run typecheck --prefix backend",
+		"lint": "npm run lint --prefix frontend && npm run lint --prefix backend"
 	},
 	"devDependencies": {
 		"concurrently": "^8.2.2",
