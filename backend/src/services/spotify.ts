@@ -17,37 +17,47 @@ interface SpotifySearchResponse {
 }
 
 let tokenCache: TokenCache | null = null;
+let tokenFetchInFlight: Promise<string> | null = null;
 
 async function getAccessToken(): Promise<string> {
 	if (tokenCache && Date.now() < tokenCache.expiresAt) {
 		return tokenCache.accessToken;
 	}
 
-	const clientId = process.env.SPOTIFY_CLIENT_ID;
-	const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
-	if (!clientId || !clientSecret) {
-		throw new Error('Missing SPOTIFY_CLIENT_ID or SPOTIFY_CLIENT_SECRET');
-	}
+	if (tokenFetchInFlight) return tokenFetchInFlight;
 
-	const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
-	const res = await fetch('https://accounts.spotify.com/api/token', {
-		method: 'POST',
-		headers: {
-			Authorization: `Basic ${credentials}`,
-			'Content-Type': 'application/x-www-form-urlencoded',
-		},
-		body: 'grant_type=client_credentials',
+	tokenFetchInFlight = (async () => {
+		const clientId = process.env.SPOTIFY_CLIENT_ID;
+		const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+		if (!clientId || !clientSecret) {
+			throw new Error('Missing SPOTIFY_CLIENT_ID or SPOTIFY_CLIENT_SECRET');
+		}
+
+		const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+		const res = await fetch('https://accounts.spotify.com/api/token', {
+			method: 'POST',
+			headers: {
+				Authorization: `Basic ${credentials}`,
+				'Content-Type': 'application/x-www-form-urlencoded',
+			},
+			body: 'grant_type=client_credentials',
+		});
+
+		if (!res.ok) throw new Error(`Spotify token error: ${res.status}`);
+
+		const data = (await res.json()) as { access_token: string; expires_in: number };
+		const ttlMs = Math.max(0, data.expires_in - 60) * 1000;
+		tokenCache = {
+			accessToken: data.access_token,
+			expiresAt: Date.now() + ttlMs,
+		};
+
+		return tokenCache.accessToken;
+	})().finally(() => {
+		tokenFetchInFlight = null;
 	});
 
-	if (!res.ok) throw new Error(`Spotify token error: ${res.status}`);
-
-	const data = (await res.json()) as { access_token: string; expires_in: number };
-	tokenCache = {
-		accessToken: data.access_token,
-		expiresAt: Date.now() + (data.expires_in - 60) * 1000,
-	};
-
-	return tokenCache.accessToken;
+	return tokenFetchInFlight;
 }
 
 export async function searchTracks(
