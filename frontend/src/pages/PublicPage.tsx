@@ -65,13 +65,15 @@ export function PublicPage() {
     <Center mih="100vh" style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)' }}>
       <Container size="xs" py="xl">
         <Stack align="center" gap="xl">
-          <Image
-            src={link.coverUrl}
-            w={240}
-            h={240}
-            radius="md"
-            style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}
-          />
+          {link.coverUrl && (
+            <Image
+              src={link.coverUrl}
+              w={240}
+              h={240}
+              radius="md"
+              style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}
+            />
+          )}
           <Stack align="center" gap={4}>
             <Title order={2} c="white" ta="center">{link.name}</Title>
             <Text c="gray.4" size="lg">{link.artist}</Text>

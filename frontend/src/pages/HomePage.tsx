@@ -49,7 +49,7 @@ export function HomePage() {
               <Table.Tr key={link.id}>
                 <Table.Td>
                   <Group gap="sm">
-                    <Image src={link.coverUrl} w={40} h={40} radius="sm" />
+                    {link.coverUrl && <Image src={link.coverUrl} w={40} h={40} radius="sm" />}
                     <Text fw={500}>{link.name}</Text>
                   </Group>
                 </Table.Td>
