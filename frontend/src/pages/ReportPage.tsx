@@ -395,7 +395,7 @@ export function ReportPage() {
 										/>
 										<Tooltip
 											{...TOOLTIP_STYLE}
-											formatter={(value: number, name: string) => [value, name.replace('_', ' ')]}
+											formatter={(value, name) => [value, String(name).replace('_', ' ')]}
 										/>
 										<Bar dataKey="clicks" radius={[4, 4, 0, 0]}>
 											{platformData.map(({ platform }) => (
