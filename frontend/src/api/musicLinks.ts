@@ -1,5 +1,5 @@
 import { apiFetch } from './client';
-import type { MusicLink, MusicLinkListItem, AnalyticsReport } from '../types';
+import type { MusicLink, MusicLinkListItem, AnalyticsReport, Granularity } from '../types';
 
 export const musicLinksApi = {
 	list: () => apiFetch<MusicLinkListItem[]>('/music-links'),
@@ -12,5 +12,6 @@ export const musicLinksApi = {
 		youtube_url: string | null;
 		soundcloud_url: string | null;
 	}) => apiFetch<MusicLink>('/music-links', { method: 'POST', body: JSON.stringify(payload) }),
-	report: (id: string) => apiFetch<AnalyticsReport>(`/music-links/${id}/report`),
+	report: (id: string, granularity: Granularity = 'day') =>
+		apiFetch<AnalyticsReport>(`/music-links/${id}/report?granularity=${granularity}`),
 };

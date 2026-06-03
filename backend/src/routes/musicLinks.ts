@@ -111,7 +111,12 @@ musicLinks.post('/', async (c) => {
 	try {
 		await kysely.insertInto('music_links').values(record).execute();
 	} catch (err: unknown) {
-		if (typeof err === 'object' && err !== null && 'code' in err && err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+		if (
+			typeof err === 'object' &&
+			err !== null &&
+			'code' in err &&
+			err.code === 'SQLITE_CONSTRAINT_UNIQUE'
+		) {
 			const existing = await kysely
 				.selectFrom('music_links')
 				.select('id')
@@ -143,12 +148,32 @@ musicLinks.post('/', async (c) => {
 // GET /api/music-links/:id/report — analytics report (MUST be before /:id)
 musicLinks.get('/:id/report', async (c) => {
 	const { id } = c.req.param();
+	const rawGranularity = c.req.query('granularity') ?? 'day';
+	const validGranularities = ['hour', 'day', 'week', 'year', 'all'] as const;
+	type Granularity = (typeof validGranularities)[number];
+	const granularity: Granularity = (validGranularities as readonly string[]).includes(
+		rawGranularity,
+	)
+		? (rawGranularity as Granularity)
+		: 'day';
+
 	const link = await kysely
 		.selectFrom('music_links')
 		.selectAll()
 		.where('id', '=', id)
 		.executeTakeFirst();
 	if (!link) return c.json({ error: 'Not found' }, 404);
+
+	const periodExpr: ReturnType<typeof sql<string>> =
+		granularity === 'hour'
+			? sql<string>`substr(created_at, 1, 13)`
+			: granularity === 'week'
+				? sql<string>`strftime('%Y-W%W', created_at)`
+				: granularity === 'year'
+					? sql<string>`substr(created_at, 1, 4)`
+					: granularity === 'all'
+						? sql<string>`'all'`
+						: sql<string>`substr(created_at, 1, 10)`;
 
 	const [{ totalViews }] = await kysely
 		.selectFrom('music_link_events')
@@ -175,26 +200,30 @@ musicLinks.get('/:id/report', async (c) => {
 
 	const viewsByDayRows = await kysely
 		.selectFrom('music_link_events')
-		.select([
-			sql<string>`substr(created_at, 1, 10)`.as('day'),
-			kysely.fn.count<number>('id').as('cnt'),
-		])
+		.select([periodExpr.as('period'), kysely.fn.count<number>('id').as('cnt')])
 		.where('music_link_id', '=', id)
 		.where('event_type', '=', 'page_view')
-		.groupBy(sql`substr(created_at, 1, 10)`)
-		.orderBy(sql`substr(created_at, 1, 10)`, 'asc')
+		.groupBy(periodExpr)
+		.orderBy(periodExpr, 'asc')
 		.execute();
 
 	const clicksByDayRows = await kysely
 		.selectFrom('music_link_events')
-		.select([
-			sql<string>`substr(created_at, 1, 10)`.as('day'),
-			kysely.fn.count<number>('id').as('cnt'),
-		])
+		.select([periodExpr.as('period'), kysely.fn.count<number>('id').as('cnt')])
 		.where('music_link_id', '=', id)
 		.where('event_type', '=', 'platform_click')
-		.groupBy(sql`substr(created_at, 1, 10)`)
-		.orderBy(sql`substr(created_at, 1, 10)`, 'asc')
+		.groupBy(periodExpr)
+		.orderBy(periodExpr, 'asc')
+		.execute();
+
+	const clicksByPlatformOverTimeRows = await kysely
+		.selectFrom('music_link_events')
+		.select([periodExpr.as('period'), 'platform', kysely.fn.count<number>('id').as('cnt')])
+		.where('music_link_id', '=', id)
+		.where('event_type', '=', 'platform_click')
+		.where('platform', 'is not', null)
+		.groupBy([periodExpr, 'platform'])
+		.orderBy(periodExpr, 'asc')
 		.execute();
 
 	const views = Number(totalViews);
@@ -208,12 +237,19 @@ musicLinks.get('/:id/report', async (c) => {
 
 	const viewsByDay: Record<string, number> = {};
 	for (const row of viewsByDayRows) {
-		viewsByDay[row.day] = Number(row.cnt);
+		viewsByDay[row.period] = Number(row.cnt);
 	}
 
 	const clicksByDay: Record<string, number> = {};
 	for (const row of clicksByDayRows) {
-		clicksByDay[row.day] = Number(row.cnt);
+		clicksByDay[row.period] = Number(row.cnt);
+	}
+
+	const clicksByPlatformOverTime: Record<string, Record<string, number>> = {};
+	for (const row of clicksByPlatformOverTimeRows) {
+		if (!row.platform) continue;
+		if (!clicksByPlatformOverTime[row.period]) clicksByPlatformOverTime[row.period] = {};
+		clicksByPlatformOverTime[row.period][row.platform] = Number(row.cnt);
 	}
 
 	return c.json({
@@ -223,6 +259,8 @@ musicLinks.get('/:id/report', async (c) => {
 		clicksByPlatform,
 		viewsByDay,
 		clicksByDay,
+		clicksByPlatformOverTime,
+		granularity,
 	});
 });
 

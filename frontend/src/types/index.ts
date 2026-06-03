@@ -43,6 +43,8 @@ export interface PlatformLinks {
 	soundcloud_url: string | null;
 }
 
+export type Granularity = 'hour' | 'day' | 'week' | 'year' | 'all';
+
 export interface AnalyticsReport {
 	totalViews: number;
 	totalClicks: number;
@@ -50,4 +52,6 @@ export interface AnalyticsReport {
 	clicksByPlatform: Record<string, number>;
 	viewsByDay: Record<string, number>;
 	clicksByDay: Record<string, number>;
+	clicksByPlatformOverTime: Record<string, Record<string, number>>;
+	granularity: Granularity;
 }
